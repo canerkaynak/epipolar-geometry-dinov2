@@ -1,7 +1,7 @@
 import torch
 import cv2 as cv
 import numpy as np
-import matplotlib.pyplot as plt
+from typing import Any
 
 def extract_sift_features(img: np.ndarray) -> tuple:
     """
@@ -100,3 +100,44 @@ def match_dinov2_features(features: tuple, patch_size: int, num_patches_width: i
         img_2_pts[i] = [img_2_x, img_2_y]
 
     return (img_1_pts, img_2_pts)
+
+import numpy as np
+
+def get_3d_bounding_boxes(
+        yolo_model: Any, 
+        left_img: np.ndarray, 
+        depth_map: np.ndarray, 
+        K: np.ndarray, 
+        global_R: np.ndarray, 
+        global_t: np.ndarray
+        ):
+    boxes_3d = []
+    results = yolo_model(left_img, classes=[2], verbose=False)
+    boxes = results[0].boxes.xyxy.cpu().numpy()
+
+    for box in boxes:
+        x_min, y_min, x_max, y_max = map(int, box[:4])
+        roi_depth = depth_map[y_min:y_max, x_min:x_max]
+        valid_depths = roi_depth[(roi_depth > 0.1) & (roi_depth < 50.0)]
+
+        if len(valid_depths) > 50:
+            median_z = np.median(valid_depths)
+            u_c, v_c = (x_min + x_max) / 2, (y_min + y_max) / 2
+            fx, fy = K[0, 0], K[1, 1]
+            cx, cy = K[0, 2], K[1, 2]
+            
+            X_c = ((u_c - cx) * median_z) / fx
+            Y_c = ((v_c - cy) * median_z) / fy
+            
+            dx, dy, dz = 1.8 / 2, 1.5 / 2, 4.0 / 2
+            corners_camera = np.array([
+                [X_c-dx, Y_c-dy, median_z-dz], [X_c+dx, Y_c-dy, median_z-dz],
+                [X_c+dx, Y_c+dy, median_z-dz], [X_c-dx, Y_c+dy, median_z-dz],
+                [X_c-dx, Y_c-dy, median_z+dz], [X_c+dx, Y_c-dy, median_z+dz],
+                [X_c+dx, Y_c+dy, median_z+dz], [X_c-dx, Y_c+dy, median_z+dz]
+            ])
+            
+            corners_global = (global_R @ corners_camera.T).T + global_t.flatten()
+            boxes_3d.append(corners_global)
+            
+    return boxes_3d

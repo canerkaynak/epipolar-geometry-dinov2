@@ -1,7 +1,10 @@
 import random
 import cv2 as cv
 import numpy as np
+import open3d as o3d
+from typing import List
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 def stereo_viewer(left_img: np.ndarray, right_img: np.ndarray, title: str = "Sequence 00 | First Images", left_title: str = "image_2", right_title: str = "image_3"):
     """
@@ -58,3 +61,91 @@ def draw_epilines(img: np.ndarray, lines: np.ndarray, pts: np.ndarray, n: int = 
         cv.circle(img, pt, 8, color, -1)
 
     return img
+
+def visualize_stereo_reconstruction(points: np.ndarray, colors: np.ndarray) -> go.Figure:
+    valid_mask = (points[:, 2] > 0.1) & (points[:, 2] < 80)
+    points_clean = points[valid_mask]
+    colors_clean = colors[valid_mask]
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points_clean)
+    pcd.colors = o3d.utility.Vector3dVector(colors_clean / 255.0)
+
+    down_pcd = pcd.voxel_down_sample(voxel_size=0.05)
+    points_final = np.asarray(down_pcd.points)
+    colors_final = np.asarray(down_pcd.colors)
+
+    cam_init_pos = dict(
+        up=dict(x=0, y=1, z=0),
+        center=dict(x=0.35, y=0, z=0),
+        eye=dict(x=0.35, y=0, z=-0.8)
+    )
+
+    fig = go.Figure(data=[go.Scatter3d(
+        x=points_final[:, 0],
+        y=points_final[:, 1],
+        z=points_final[:, 2],
+        mode='markers',
+        marker=dict(size=2, color=colors_final)
+    )])
+
+    fig.update_layout(
+        scene=dict(
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False),
+            zaxis=dict(visible=False),
+            aspectmode='data',
+            camera=cam_init_pos
+        ),
+        margin=dict(l=0, r=0, b=0, t=0)
+    )
+    return fig
+
+def visualize_odometry_scene(final_pcd: o3d.geometry.PointCloud, trajectory: List[np.ndarray], global_3d_boxes: List[np.ndarray]) -> go.Figure:
+    downsampled_pcd = final_pcd.voxel_down_sample(voxel_size=0.5)
+
+    points_vis = np.asarray(downsampled_pcd.points)
+    colors_vis = np.asarray(downsampled_pcd.colors)
+    traj_vis = np.array(trajectory)
+
+    map_trace = go.Scatter3d(
+        x=points_vis[:, 0],
+        y=points_vis[:, 1],
+        z=points_vis[:, 2],
+        mode='markers',
+        marker=dict(size=2, color=colors_vis)
+    )
+
+    traj_trace = go.Scatter3d(
+        x=traj_vis[:, 0],
+        y=traj_vis[:, 1],
+        z=traj_vis[:, 2],
+        mode='lines',
+        line=dict(color='red', width=4)
+    )
+
+    box_x, box_y, box_z = [], [], []
+    lines_idx = [
+        [0, 1], [1, 2], [2, 3], [3, 0], 
+        [4, 5], [5, 6], [6, 7], [7, 4], 
+        [0, 4], [1, 5], [2, 6], [3, 7]  
+    ]
+
+    for corners in global_3d_boxes:
+        for idx in lines_idx:
+            box_x.extend([corners[idx[0], 0], corners[idx[1], 0], None])
+            box_y.extend([corners[idx[0], 1], corners[idx[1], 1], None])
+            box_z.extend([corners[idx[0], 2], corners[idx[1], 2], None])
+
+    box_trace = go.Scatter3d(
+        x=box_x, y=box_y, z=box_z,
+        mode='lines', line=dict(color='lime', width=3),
+        name='3D Vehicles'
+    )
+
+    fig = go.Figure(data=[map_trace, traj_trace, box_trace])
+    fig.update_layout(
+        scene=dict(aspectmode='data'),
+        margin=dict(l=0, r=0, b=0, t=0)
+    )
+    return fig

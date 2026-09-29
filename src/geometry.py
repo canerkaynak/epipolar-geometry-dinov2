@@ -28,3 +28,33 @@ def calculate_fundamental_matrix_from_pts(pts_1: np.ndarray, pts_2: np.ndarray):
     pts_2_masked = pts_2[mask]
 
     return F, (pts_1_masked, pts_2_masked)
+
+def reprojectImageTo3D(left_img: np.ndarray, right_img: np.ndarray, Q: np.ndarray):
+    left_img_gray = cv.cvtColor(left_img, cv.COLOR_BGR2GRAY)
+    right_img_gray = cv.cvtColor(right_img, cv.COLOR_BGR2GRAY)
+
+    window_size = 3
+    min_disp = 0
+    num_disp = 128
+
+    stereo = cv.StereoSGBM_create(
+        minDisparity=0,
+        numDisparities=64,
+        blockSize=11,
+        P1=8 * 3 * 11 ** 2,
+        P2=32 * 3 * 11 ** 2,
+        disp12MaxDiff=5,
+        uniquenessRatio=10,
+        speckleWindowSize=100,
+        speckleRange=32,
+        mode=cv.STEREO_SGBM_MODE_SGBM_3WAY
+    )
+
+    disparity_SGBM = stereo.compute(left_img_gray, right_img_gray)
+    disparity_SGBM = disparity_SGBM.astype(np.float32) / 16.0
+
+    h, w, c = left_img.shape
+    reconstruction = cv.reprojectImageTo3D(disparity_SGBM, Q)
+    points = -reconstruction.copy()
+
+    return (points, disparity_SGBM)

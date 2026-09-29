@@ -1,0 +1,5 @@
+opencv-python
+matplotlib
+open3d
+plotly
+numpy
