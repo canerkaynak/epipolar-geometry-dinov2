@@ -7,4 +7,10 @@ The project consists of two main steps:
 * **Visual Odometry Pipeline:** Building a complete monocular visual odometry pipeline using the better-performing method on the KITTI Vision Benchmark Suite.
 
 ## 🤼 Classical Methods vs. Foundation Models (04_evaluation_comparison.ipynb)
-A critical component of this project was evaluating the robustness of feature matching for Fundamental Matrix estimation. I compared the classical SIFT algorithm against Meta's DINOv2 foundation model.
+A critical component of this project was evaluating the robustness of feature matching for Fundamental Matrix estimation. I compared the classical SIFT algorithm against DINOv2 foundation model.
+
+Evaluation results showed that DINOv2 outperformed SIFT in all metrics:
+| Method | Inlier Points | Median Symmetric Distance | Median Sampson Error | Mean Sampson Error | Max Sampson Error |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **SIFT** | 925 | 1.749018e+00 | 4.434024e-01 | 7.522841e-01 | 4.401623e+00 |
+| **DINOv2** | 965 | 2.323716e-20 | 5.915444e-21 | 9.867080e-21	 | 6.021459e-20 |
