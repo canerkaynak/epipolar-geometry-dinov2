@@ -5,3 +5,6 @@ This project evaluates the robustness of classical feature extraction methods (S
 The project consists of two main steps:
 * **Classical Methods vs. Foundation Models:** Comparatively analyzing classical feature extraction methods (SIFT) and foundation models (DINOv2).
 * **Visual Odometry Pipeline:** Building a complete monocular visual odometry pipeline using the better-performing method on the KITTI Vision Benchmark Suite.
+
+## 🤼 Classical Methods vs. Foundation Models (04_evaluation_comparison.ipynb)
+A critical component of this project was evaluating the robustness of feature matching for Fundamental Matrix estimation. I compared the classical SIFT algorithm against Meta's DINOv2 foundation model.
