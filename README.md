@@ -22,22 +22,22 @@ flowchart LR
     classDef io fill:#eab296,stroke:#0f172a,stroke-width:2px,color:#0f172a;
     classDef step fill:#0f172a,stroke:#eab296,stroke-width:2px,color:#e2e8f0;
 
-    In[/"&nbsp;&nbsp;&nbsp;&nbsp;KITTI Stereo Frames&nbsp;&nbsp;&nbsp;&nbsp;"/]:::io --> S1["<br/>&nbsp;&nbsp;&nbsp;&nbsp;1. Disparity & 3D Reprojection&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;(StereoSGBM)&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]:::step
-    In --> S2["<br/>&nbsp;&nbsp;&nbsp;&nbsp;2. Feature Tracking&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;(Shi-Tomasi & LK Flow)&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]:::step
+    In[/"KITTI Stereo Frames"/]:::io --> S1["1. Disparity & 3D Reprojection<br/>(StereoSGBM)"]:::step
+    In --> S2["2. Feature Tracking<br/>(Shi-Tomasi & LK Flow)"]:::step
     
-    In -.->|"Left Image (RGB)"| S5["<br/>&nbsp;&nbsp;&nbsp;&nbsp;5. 3D Object Detection&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;(YOLO26n)&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]:::step
+    In -.->|"Left Image (RGB)"| S5["5. 3D Object Detection<br/>(YOLO26n)"]:::step
     
-    S1 -.->|"3D Coordinates"| S3["<br/>&nbsp;&nbsp;&nbsp;&nbsp;3. Pose Estimation&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;(PnP RANSAC)&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]:::step
+    S1 -.->|"3D Coordinates"| S3["3. Pose Estimation<br/>(PnP RANSAC)"]:::step
     S2 -.->|"2D Tracked Points"| S3
     
-    S3 --> S4["<br/>&nbsp;&nbsp;&nbsp;&nbsp;4. Global Point Cloud Transform&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]:::step
+    S3 --> S4["4. Global Point Cloud Transform"]:::step
     
     S1 -.->|"Depth Map (Z-axis)"| S5
     S3 -.->|"Global R, t"| S5
     
-    S4 --> S6["<br/>&nbsp;&nbsp;&nbsp;&nbsp;6. Export & Filtering&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;(SOR & Deduplication)&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]:::step
+    S4 --> S6["6. Export & Filtering<br/>(SOR & Deduplication)"]:::step
     S5 --> S6
     
-    Out((("<br/>&nbsp;&nbsp;&nbsp;&nbsp;Final Outputs (.ply):&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;• Dense Point Cloud&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;• Trajectory&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;• YOLO 3D Boxes&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"))):::io
+    Out(((<span style='line-height:1.5; display:block;'>Final Outputs:<br/>• Dense Point Cloud<br/>• Trajectory<br/>• YOLO 3D Boxes</span>))):::io
     S6 --> Out
 ```
