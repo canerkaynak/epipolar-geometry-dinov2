@@ -45,7 +45,7 @@ flowchart LR
 Based on the pipeline diagram, the system executes a modular architecture for real-time spatial perception:
 
 1. **Disparity & 3D Reprojection:** The system computes dense disparity maps using StereoSGBM and reprojects them into 3D physical coordinates.
-2. **Feature Tracking:** Simultaneously, robust 2D features are tracked across consecutive frames via Shi-Tomasi and Lucas-Kanade Optical Flow.
+2. **Feature Tracking:** To ensure real-time trajectory tracking without the heavy computational bottleneck of frame-by-frame foundation fodel matching, robust 2D features are continuously tracked across consecutive frames via Shi-Tomasi and Lucas-Kanade Optical Flow.
 3. **Pose Estimation:** The tracked 2D features and their corresponding 3D coordinates are fed into a Perspective-n-Point (PnP) solver with RANSAC to continuously estimate the camera's global trajectory (R, t).
 4. **Global Point Cloud Transform:** Local 3D points are transformed into a unified global coordinate system using the estimated camera poses.
 5. **3D Object Detection:** A YOLO26n model detects vehicles in the RGB frames. These 2D bounding boxes are projected into 3D space utilizing the depth maps and global camera poses.
