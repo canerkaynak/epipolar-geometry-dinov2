@@ -15,6 +15,10 @@ Evaluation results showed that DINOv2 outperformed SIFT in all metrics:
 | **SIFT** | 925 | 1.749018e+00 | 4.434024e-01 | 7.522841e-01 | 4.401623e+00 |
 | **DINOv2** | 965 | 2.323716e-20 | 5.915444e-21 | 9.867080e-21	 | 6.021459e-20 |
 
+<p align="center">
+<i> Table 1: Fundamental Matrix estimation metrics (SIFT vs. DINOv2). </i>
+</p>
+
 ## ⚙️ Visual Odometry Pipeline
 
 ```mermaid
@@ -42,9 +46,21 @@ flowchart LR
     S6 --> Out
 ```
 
+<p align="center">
+<i> Figure 1: Architecture of the hybrid visual odometry and 3D perception pipeline. </i>
+</p>
+
 Based on the pipeline diagram, the system executes a modular architecture for real-time spatial perception:
 
 1. **Disparity & 3D Reprojection:** The system computes dense disparity maps using StereoSGBM and reprojects them into 3D physical coordinates.
+
+<br>
+<p align="center">
+<img width="80%" alt="Disparity" src="https://github.com/user-attachments/assets/23c5cfcf-b62b-42aa-a58b-ecbdfabee2f6" />
+<br>
+<i> Figure 2: Dense disparity map generated via StereoSGBM, providing foundational depth data for the 3D scene reconstruction. </i>
+</p>
+
 2. **Feature Tracking:** To ensure real-time trajectory tracking without the heavy computational bottleneck of frame-by-frame foundation fodel matching, robust 2D features are continuously tracked across consecutive frames via Shi-Tomasi and Lucas-Kanade Optical Flow.
 3. **Pose Estimation:** The tracked 2D features and their corresponding 3D coordinates are fed into a Perspective-n-Point (PnP) solver with RANSAC to continuously estimate the camera's global trajectory (R, t).
 4. **Global Point Cloud Transform:** Local 3D points are transformed into a unified global coordinate system using the estimated camera poses.
